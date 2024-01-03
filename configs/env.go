@@ -51,3 +51,12 @@ func DbName() string {
 
 	return os.Getenv(("DBNAME"))
 }
+
+func SecretKey() string {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error Loading .env File!!")
+	}
+
+	return os.Getenv(("SECRET"))
+}

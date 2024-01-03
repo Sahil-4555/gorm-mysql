@@ -19,6 +19,7 @@ import (
 
 	"github.com/Sahil-4555/go-crud-api/configs"
 	"github.com/Sahil-4555/go-crud-api/helper"
+	"github.com/Sahil-4555/go-crud-api/middleware"
 	"github.com/Sahil-4555/go-crud-api/models"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -581,12 +582,12 @@ func Login(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":   user.ID,
+		"id":    user.ID,
 		"email": user.Email,
 		"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET")))
+	tokenString, err := token.SignedString([]byte(configs.SecretKey()))
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -594,25 +595,34 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
-
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600*24*30, "", "", false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"token": tokenString,
 	})
 
 }
 
-// r.GET("/validate", middleware.RequireAuth, controller.Validate)
 func Validate(c *gin.Context) {
-	user, err := c.Get("user")
-	if !err {
+	user_id, err := middleware.ExtractTokenID(c)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Unauthorized User.",
+			"error": err.Error(),
 		})
 		return
 	}
+
+	var user models.User
+	err = DB.Model(&models.User{}).First(&user, user_id).Error
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message": user,
+		"data": user,
 	})
+	return
+
 }

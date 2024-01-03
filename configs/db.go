@@ -8,7 +8,7 @@ import (
 )
 
 func InitDB() *gorm.DB {
-	User := Username()
+	User := "sahil"
 	Password := Password()
 	Host := Host()
 	Port := Port()

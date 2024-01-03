@@ -34,8 +34,7 @@ func main() {
 	}
 
 	port := "5000"
-	router := gin.New()
-	router.Use(gin.Logger())
-	routes.Routes(router)
-	router.Run(":" + port)
+	r := gin.Default()
+	routes.Routes(r)
+	r.Run(":" + port)
 }

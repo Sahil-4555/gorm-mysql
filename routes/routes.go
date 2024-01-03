@@ -6,19 +6,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Routes(incomingRoutes *gin.Engine) {
-	// r.GET("/validate", middleware.RequireAuth, controller.Validate)
-	incomingRoutes.POST("/create", middleware.RequireAuth, controller.Create)
-	incomingRoutes.PUT("/update/:id", controller.Update)
-	incomingRoutes.GET("/getall", controller.Getall)
-	incomingRoutes.GET("/getbyid/:id", controller.Getbyid)
-	incomingRoutes.DELETE("/deletebyid/:id", controller.Deletebyid)
-	incomingRoutes.POST("/uploadimage/:id", controller.UploadImage)
-	incomingRoutes.PUT("/updateimage/:id", controller.UpdateImage)
-	incomingRoutes.GET("/getimage/:id", controller.GetImage)
-	incomingRoutes.GET("/pagination", controller.Pagination)
-	incomingRoutes.GET("/searchandler", controller.SearchHandler)
-	incomingRoutes.POST("/signin", controller.Login)
-	incomingRoutes.POST("/signup", controller.Signup)
-	incomingRoutes.GET("/validator", middleware.RequireAuth, controller.Validate)
+func Routes(r *gin.Engine) {
+	// Public Routes
+	public := r.Group("/api")
+	public.POST("/login", controller.Login)
+	public.POST("/register", controller.Signup)
+
+	// Protected Routes
+	protected := r.Group("/api/admin")
+	protected.Use(middleware.JwtAuthMiddleware())
+	protected.POST("/create", controller.Create)
+	protected.PUT("/update/:id", controller.Update)
+	protected.GET("/getall", controller.Getall)
+	protected.GET("/getbyid/:id", controller.Getbyid)
+	protected.DELETE("/deletebyid/:id", controller.Deletebyid)
+	protected.POST("/uploadimage/:id", controller.UploadImage)
+	protected.PUT("/updateimage/:id", controller.UpdateImage)
+	protected.GET("/getimage/:id", controller.GetImage)
+	protected.GET("/pagination", controller.Pagination)
+	protected.GET("/searchandler", controller.SearchHandler)
+	protected.GET("/validator", controller.Validate)
 }
